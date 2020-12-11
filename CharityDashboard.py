@@ -10,9 +10,9 @@ import plotly.graph_objs as go
 # class CharityDashboard:
 
 # <<<<<<< HEAD
-df = pd.read_csv('../CharityProjectcopy/CharityInfo.csv')
+df = pd.read_csv('../CharityProject/CharityInfo.csv')
 # =======
-dc = pd.read_csv('../CharityProjectcopy/CharityInfoAbbrev.csv')
+dc = pd.read_csv('../CharityProject/CharityInfoAbbrev.csv')
 # >>>>>>> 31c494a0b5ffe2ed46b92af6c97c1676bf9fa552
 df['Category'] = df['Category'].astype('category')
 df['Name'] = df['Name'].astype('object')
