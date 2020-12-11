@@ -10,9 +10,9 @@ import plotly.graph_objs as go
 # class CharityDashboard:
 
 # <<<<<<< HEAD
-df = pd.read_csv('../CharityProject/CharityInfo.csv')
+df = pd.read_csv('../CharityProjectcopy/CharityInfo.csv')
 # =======
-dc = pd.read_csv('../CharityProject/CharityInfo.csv')
+dc = pd.read_csv('../CharityProjectcopy/CharityInfoAbbrev.csv')
 # >>>>>>> 31c494a0b5ffe2ed46b92af6c97c1676bf9fa552
 df['Category'] = df['Category'].astype('category')
 df['Name'] = df['Name'].astype('object')
@@ -61,6 +61,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
         {"label": "Environment/Animal", "value": "Environment/Animal"},
         {"label": "Health", "value": "Health"},
         {"label": "Religious", "value": "Religious"},
+        {"label": "Education", "value": "Education"},
     ],
                  value="Domestic Needs"
                  ),
@@ -83,6 +84,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
         {"label": "Environment/Animal", "value": "Environment/Animal"},
         {"label": "Health", "value": "Health"},
         {"label": "Religious", "value": "Religious"},
+        {"label": "Education", "value": "Education"},
     ],
                  value="Domestic Needs"
                  ),
@@ -102,6 +104,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
         {"label": "Environment/Animal", "value": "Environment/Animal"},
         {"label": "Health", "value": "Health"},
         {"label": "Religious", "value": "Religious"},
+        {"label": "Education", "value": "Education"},
     ],
                  value="Domestic Needs"
                  ),
@@ -121,6 +124,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
         {"label": "Environment/Animal", "value": "Environment/Animal"},
         {"label": "Health", "value": "Health"},
         {"label": "Religious", "value": "Religious"},
+        {"label": "Education", "value": "Education"},
     ],
                  value="Domestic Needs"
                  ),
@@ -139,6 +143,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
         {"label": "Environment/Animal", "value": "Environment/Animal"},
         {"label": "Health", "value": "Health"},
         {"label": "Religious", "value": "Religious"},
+        {"label": "Education", "value": "Education"},
     ],
                  value="Domestic Needs"
                  ),
@@ -168,7 +173,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
                            children=dcc.Input(id='name_filter', placeholder='Search Names...')),
               ]),
               dash_table.DataTable(style_data={"textAlign": "left"}, id='table',
-                                   columns=[{"name": i, "id": i} for i in dc.columns],
+                                   columns=[{"name": i, "id": i} for i in df.columns],
                                    style_cell={"backgroundColor": "lightblue"},
                                    page_current=0,
                                    page_size=PAGE_SIZE,
@@ -182,11 +187,12 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
 @app.callback(Output('graph1', 'figure'),
               [Input('select-bar-category', 'value')])
 def bar_update_figure(selected_category):
-    bar_filtered_df = df[df['Category'] == selected_category]
+    bar_filtered_df = dc[dc['Category'] == selected_category]
     bar_filtered_df = bar_filtered_df.apply(lambda x: x.str.strip() if x.dtype == 'object' else x)
-    bar_new_df = bar_filtered_df.groupby(['Name'])['Total Revenue'].sum().reset_index()
+    bar_new_df = bar_filtered_df.groupby(['Name Abbreviation', 'Name'])['Total Revenue'].sum().reset_index()
     bar_new_df = bar_new_df.sort_values(by=['Total Revenue'], ascending=[False])
-    data_interactive_barchart = [go.Bar(x=bar_new_df['Name'], y=bar_new_df['Total Revenue'])]
+    data_interactive_barchart = [go.Bar(x=bar_new_df['Name Abbreviation'], y=bar_new_df['Total Revenue'],
+                                        hovertext=bar_new_df['Name'])]
     return {'data': data_interactive_barchart,
             'layout': go.Layout(title='Total Revenue for ' + selected_category + ' charities',
                                 xaxis={'title': 'Name of Charity'},
@@ -197,29 +203,30 @@ def bar_update_figure(selected_category):
 @app.callback(Output('graph2', 'figure'),
               [Input('select-stack-category', 'value')])
 def stack_update_figure(selected_category):
-    stack_filtered_df = df[df['Category'] == selected_category]
+    stack_filtered_df = dc[dc['Category'] == selected_category]
     stack_filtered_df = stack_filtered_df.apply(lambda x: x.str.strip() if x.dtype == 'object' else x)
     stack_filtered_df["Other Revenue"] = stack_filtered_df["Total Revenue"] - stack_filtered_df["Private Donations"]
-    stack_new_df = stack_filtered_df.groupby(['Name']).agg(
+    stack_new_df = stack_filtered_df.groupby(['Name Abbreviation', 'Name']).agg(
         {"Total Revenue": "sum", "Private Donations": "sum", "Other Revenue": "sum"}).reset_index()
     stack_new_df = stack_new_df.sort_values(by=['Total Revenue'], ascending=[False])
-    trace1_stackbarchart = go.Bar(x=stack_new_df["Name"], y=stack_new_df["Private Donations"], name="Donations",
-                                  marker={"color": "#FFD700"})
-    trace2_stackbarchart = go.Bar(x=stack_new_df["Name"], y=stack_new_df["Other Revenue"], name="Other Revenue",
-                                  marker={"color": "#9EA0A1"})
+    trace1_stackbarchart = go.Bar(x=stack_new_df["Name Abbreviation"], y=stack_new_df["Private Donations"], name="Donations",
+                                  marker={"color": "#FFD700"}, hovertext=stack_new_df["Name"])
+    trace2_stackbarchart = go.Bar(x=stack_new_df["Name Abbreviation"], y=stack_new_df["Other Revenue"], name="Other Revenue",
+                                  marker={"color": "#9EA0A1"}, hovertext=stack_new_df["Name"])
     data_stackbarchart = [trace1_stackbarchart, trace2_stackbarchart]
     return {'data': data_stackbarchart,
             'layout': go.Layout(title='Total Revenue for ' + selected_category + ' charities',
-                                xaxis={'title': 'Name of Charity'}, yaxis={'title': 'Total Revenue'}, barmode='stack')}
+                                xaxis={'title': '       Name of Charity'}, yaxis={'title': 'Total Revenue'}, barmode='stack')}
 
 
 @app.callback(Output('graph3', 'figure'),
               [Input('select-line-category', 'value')])
 def line_update_figure(selected_category):
-    line_filtered_df = df[df['Category'] == selected_category]
-    line_new_df = line_filtered_df.groupby(["Name"]).agg({"Fundraising Efficiency %": "max"}).reset_index()
+    line_filtered_df = dc[dc['Category'] == selected_category]
+    line_new_df = line_filtered_df.groupby(["Name Abbreviation", "Name"]).agg({"Fundraising Efficiency %": "max"}).reset_index()
     data_linechart = [
-        go.Scatter(x=line_new_df['Name'], y=line_new_df['Fundraising Efficiency %'], mode='lines', name='Temp')]
+        go.Scatter(x=line_new_df['Name Abbreviation'], y=line_new_df['Fundraising Efficiency %'], mode='lines', name='Temp',
+                   hovertext=line_new_df['Name'])]
     return {'data': data_linechart,
             'layout': go.Layout(title='Fundraising Efficiency for ' + selected_category + ' charities',
                                 xaxis={'title': 'Name of Charity'}, yaxis={'title': 'Fundraising Efficiency %'})}
@@ -228,28 +235,29 @@ def line_update_figure(selected_category):
 @app.callback(Output('graph4', 'figure'),
               [Input('select-multi-category', 'value')])
 def multi_update_figure(selected_category):
-    multi_filtered_df = df[df['Category'] == selected_category]
-    multi_new_df = multi_filtered_df.groupby(["Name"]).agg(
+    multi_filtered_df = dc[dc['Category'] == selected_category]
+    multi_new_df = multi_filtered_df.groupby(["Name Abbreviation", "Name"]).agg(
         {"Fundraising Efficiency %": "max", "Charitible Commitment %": "max"}).reset_index()
-    trace1_multiline = go.Scatter(x=multi_new_df["Name"], y=multi_new_df["Fundraising Efficiency %"], mode="lines",
-                                  name="Fundraising Efficiency %")
-    trace2_multiline = go.Scatter(x=multi_new_df["Name"], y=multi_new_df["Charitible Commitment %"], mode="lines",
-                                  name="Charitible Commitment %")
+    trace1_multiline = go.Scatter(x=multi_new_df["Name Abbreviation"], y=multi_new_df["Fundraising Efficiency %"], mode="lines",
+                                  name="Fundraising Efficiency %", hovertext=multi_new_df["Name"])
+    trace2_multiline = go.Scatter(x=multi_new_df["Name Abbreviation"], y=multi_new_df["Charitible Commitment %"], mode="lines",
+                                  name="Charitible Commitment %", hovertext=multi_new_df["Name"])
     data_multiline = [trace1_multiline, trace2_multiline]
     return {'data': data_multiline, 'layout': go.Layout(
         title='Fundraising Efficiency vs Charitible Commitment for ' + selected_category + ' charities',
-        xaxis={'title': 'Name of Charity'}, yaxis={'title': 'Fundraising Efficiency and Charitible Commitment %'})}
+        xaxis={'title': '       Name of Charity'}, yaxis={'title': 'Fundraising Efficiency and Charitible Commitment %'})}
 
 
 @app.callback(Output('graph5', 'figure'),
               [Input('select-heat-category', 'value')])
 def heat_update_figure(selected_category):
-    heat_filtered_df = df[df['Category'] == selected_category]
-    data_heatmap = [go.Heatmap(x=heat_filtered_df["Name"], y=heat_filtered_df["Category"],
-                               z=heat_filtered_df["Private Donations"].values.tolist(), colorscale="Jet")]
+    heat_filtered_df = dc[dc['Category'] == selected_category]
+    data_heatmap = [go.Heatmap(x=heat_filtered_df["Name Abbreviation"], y=heat_filtered_df["Category"],
+                               z=heat_filtered_df["Private Donations"].values.tolist(), colorscale="Jet",
+                               hovertext=heat_filtered_df["Name"])]
     return {'data': data_heatmap,
             'layout': go.Layout(title='Private Donation Amounts for ' + selected_category + ' charities',
-                                xaxis={'title': 'Name of Charity'}, yaxis={'title': 'Category'})}
+                                xaxis={'title': '   Name of Charity'}, yaxis={'title': 'Category'})}
 
 
 @app.callback(Output('table', 'data'),
