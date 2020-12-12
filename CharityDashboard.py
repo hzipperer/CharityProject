@@ -43,7 +43,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
              style={"textAlign": "center"}),
     html.Div("Charity Information for the top Charities in the US in 2019",
              style={"textAlign": "center"}),
-    html.Br(),
+    html.Label(['Data taken from ', html.A('Forbes Top Charity List', href='https://www.forbes.com/lists/top-charities/#46b767485f50')]),
     html.Br(),
     html.Br(),
 
