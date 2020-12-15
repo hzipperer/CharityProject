@@ -13,11 +13,11 @@ import plotly.graph_objs as go
 df = pd.read_csv('../CharityProject/CharityInfo.csv')
 # =======
 dc = pd.read_csv('../CharityProject/CharityInfoAbbrev.csv')
-# >>>>>>> 31c494a0b5ffe2ed46b92af6c97c1676bf9fa552
+# 
 df['Category'] = df['Category'].astype('category')
 df['Name'] = df['Name'].astype('object')
 
-
+# Method to check types of the data for the search function
 def get_str_dtype(df, col):
     """Return dtype of col in df"""
     dtypes = ['category', 'object']
@@ -31,6 +31,7 @@ def get_str_dtype(df, col):
 
 app = dash.Dash()
 
+# Top of Dashboard/Welcome to User
 PAGE_SIZE = 10
 app.layout = html.Div(style={"textAlign": "center"}, children=[
     html.H1(children="CHARITY DASHBOARD", style={"textAlign": "center", "color": "white", "backgroundColor": "black"}),
@@ -43,6 +44,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
              style={"textAlign": "center"}),
     html.Div("Charity Information for the top Charities in the US in 2019",
              style={"textAlign": "center"}),
+    # Hyperlink to the forbes article
     html.Label(['Data taken from ', html.A('Forbes Top Charity List', href='https://www.forbes.com/lists/top-charities/#46b767485f50')]),
     html.Br(),
     html.Br(),
@@ -183,7 +185,7 @@ app.layout = html.Div(style={"textAlign": "center"}, children=[
               ])
 ])
 
-
+# Callback to update the Bar Chart upon user selection
 @app.callback(Output('graph1', 'figure'),
               [Input('select-bar-category', 'value')])
 def bar_update_figure(selected_category):
@@ -199,7 +201,7 @@ def bar_update_figure(selected_category):
                                 yaxis={'title': 'Total Revenue'},
                                 )}
 
-
+# Callback to update the Stack Bar Chart upon user selection
 @app.callback(Output('graph2', 'figure'),
               [Input('select-stack-category', 'value')])
 def stack_update_figure(selected_category):
@@ -218,7 +220,7 @@ def stack_update_figure(selected_category):
             'layout': go.Layout(title='Total Revenue for ' + selected_category + ' charities',
                                 xaxis={'title': '       Name of Charity'}, yaxis={'title': 'Total Revenue'}, barmode='stack')}
 
-
+# Callback to update the Line Chart upon user selection
 @app.callback(Output('graph3', 'figure'),
               [Input('select-line-category', 'value')])
 def line_update_figure(selected_category):
@@ -231,7 +233,7 @@ def line_update_figure(selected_category):
             'layout': go.Layout(title='Fundraising Efficiency for ' + selected_category + ' charities',
                                 xaxis={'title': 'Name of Charity'}, yaxis={'title': 'Fundraising Efficiency %'})}
 
-
+# Callback to update the MultiLine Chart upon user selection
 @app.callback(Output('graph4', 'figure'),
               [Input('select-multi-category', 'value')])
 def multi_update_figure(selected_category):
@@ -247,7 +249,7 @@ def multi_update_figure(selected_category):
         title='Fundraising Efficiency vs Charitible Commitment for ' + selected_category + ' charities',
         xaxis={'title': '       Name of Charity'}, yaxis={'title': 'Fundraising Efficiency and Charitible Commitment %'})}
 
-
+# Callback to update the Heatmap upon user selection
 @app.callback(Output('graph5', 'figure'),
               [Input('select-heat-category', 'value')])
 def heat_update_figure(selected_category):
@@ -259,7 +261,7 @@ def heat_update_figure(selected_category):
             'layout': go.Layout(title='Private Donation Amounts for ' + selected_category + ' charities',
                                 xaxis={'title': '   Name of Charity'}, yaxis={'title': 'Category'})}
 
-
+# Callback to update the table of data when search criteria is entered
 @app.callback(Output('table', 'data'),
               [Input('col_select', 'value'),
                Input('cat_filter', 'value'),
@@ -276,7 +278,7 @@ def filter_table(col, category, name):
     else:
         return df.to_dict('rows')
 
-
+# Callback to show the search box when a data type is selected
 @app.callback([Output(x, 'style')
                for x in ['container_cat_filter', 'container_name_filter']],
               [Input('col_select', 'value')])
